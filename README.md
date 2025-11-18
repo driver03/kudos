@@ -3,13 +3,12 @@
 Kudos - First Katools-integrated BSD-like operating system
 
 ## spamska's Kudos Notebook
-
+```
 17/11/25
 
 Current commit is NOT final 0.0. This is a prototype release so I don't end up accidently losing the project like I did with original i386 COS. It's really barebones and barely works but I'll be iterating on each version and pushing origin to the main branch when I can.
 
 So far I've integrated:
-```
 > Limine-based boot flow
 > 8×8 bitmap font framebuffer console
 > Full PC/AT scancode set with shift + caps
