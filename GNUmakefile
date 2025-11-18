@@ -10,7 +10,6 @@ HOST_LIBS :=
 FS_SIZE_MB ?= 5120
 FS_IMAGE := kfs.img
 FS_OFFSET_SECTORS := 10485760
-
 # --- RISC-V Toolchain ---
 ifeq ($(ARCH),riscv64)
     TOOLCHAIN_PREFIX := riscv64-unknown-elf-
@@ -52,7 +51,6 @@ run-riscv64: $(IMAGE_NAME).iso
 	    -m 5G \
 	    -nographic
 
-
 .PHONY: run-hdd-x86_64
 run-hdd-x86_64: ovmf/ovmf-code-$(ARCH).fd $(IMAGE_NAME).hdd
 	qemu-system-$(ARCH) \
@@ -81,9 +79,12 @@ ovmf/ovmf-code-$(ARCH).fd:
 	esac
 
 # --- Limine ---
-limine/limine:
+.PHONY: fetch-limine
+fetch-limine:
 	rm -rf limine
 	git clone https://codeberg.org/Limine/Limine.git limine --branch=v10.x-binary --depth=1
+
+limine/limine: fetch-limine
 	$(MAKE) -C limine \
 		CC="$(HOST_CC)" \
 		CFLAGS="$(HOST_CFLAGS)" \
@@ -124,10 +125,8 @@ ifeq ($(ARCH),x86_64)
 	./limine/limine bios-install $(IMAGE_NAME).iso
 endif
 ifeq ($(ARCH),riscv64)
-	# For RISC-V, just create a raw ISO with the kernel and filesystem
 	genisoimage -R -o $(IMAGE_NAME).iso iso_root
 endif
-	# Append the extra exFAT filesystem to the ISO
 	dd if=$(FS_IMAGE) of=$(IMAGE_NAME).iso bs=512 seek=$(FS_OFFSET_SECTORS) conv=notrunc
 	rm -rf iso_root make $(FS_IMAGE)
 
@@ -155,7 +154,7 @@ endif
 .PHONY: clean
 clean:
 	$(MAKE) -C kernel clean
-	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd $(FS_IMAGE)
+	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd $(FS_IMAGE) limine
 
 .PHONY: distclean
 distclean:

@@ -1,5 +1,3 @@
-add a function where the kernel will run forever without having to embed a while(1); in a task so processes can run but the os runs something when it has nothing to run to keep it from crashing
-
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
