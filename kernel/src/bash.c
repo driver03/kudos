@@ -8,11 +8,6 @@ static void clear(void) {
 
 int bash(uint32_t uid) {
     (void)uid;
-    static bool first = true;
-    if (first) {
-        fbputs("0.0 KUDOS BASH, MAINTAINED BY THE KATOOLS PROJECT.\n\n");
-        first = false;
-    }
     while (1) {
         fbputs("root@kudos> ");
         char *line = fbgets();
