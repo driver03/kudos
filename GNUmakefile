@@ -92,6 +92,7 @@ all-hdd: $(IMAGE_NAME).hdd
 bios: $(IMAGE_NAME).iso
 	qemu-system-$(ARCH) \
 		-M q35 \
+		-serial stdio \
 		-cdrom $(IMAGE_NAME).iso \
 		$(QEMUFLAGS)
 
@@ -101,9 +102,11 @@ uefi: $(IMAGE_NAME).iso
 	curl -L https://github.com/osdev0/edk2-ovmf-nightly/releases/latest/download/edk2-ovmf.tar.gz | tar -xz
 	qemu-system-x86_64 \
 		-M q35 \
+		-serial stdio \
 		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf/ovmf-code-x86_64.fd,readonly=on \
 		-cdrom $(IMAGE_NAME).iso \
 		$(QEMUFLAGS)
+		-serial stdio
 
 .PHONY: run-hdd
 run-hdd: run-hdd-$(ARCH)
