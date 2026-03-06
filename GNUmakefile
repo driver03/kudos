@@ -44,7 +44,7 @@ $(info "                                                                        
 $(info >================================== THE KUDOS "U" ====================================<)
 $(info )
 $(info )
-$(info  COPYRIGHT (C) 2025 KATOOLS.ORG, ALL RIGHTS RESERVED)
+$(info  COPYRIGHT (C) 2026 KATOOLS.ORG, ALL RIGHTS RESERVED)
 $(info )
 $(info  This software is licensed under the Free and Fair Software License)
 $(info  Revised Version 1.0.)
@@ -88,8 +88,22 @@ all: $(IMAGE_NAME).iso
 .PHONY: all-hdd
 all-hdd: $(IMAGE_NAME).hdd
 
-.PHONY: run
-run: run-$(ARCH)
+.PHONY: bios
+bios: $(IMAGE_NAME).iso
+	qemu-system-$(ARCH) \
+		-M q35 \
+		-cdrom $(IMAGE_NAME).iso \
+		$(QEMUFLAGS)
+
+.PHONY: uefi
+uefi: $(IMAGE_NAME).iso
+	@rm -rf edk2-ovmf
+	curl -L https://github.com/osdev0/edk2-ovmf-nightly/releases/latest/download/edk2-ovmf.tar.gz | tar -xz
+	qemu-system-x86_64 \
+		-M q35 \
+		-drive if=pflash,unit=0,format=raw,file=edk2-ovmf/ovmf-code-x86_64.fd,readonly=on \
+		-cdrom $(IMAGE_NAME).iso \
+		$(QEMUFLAGS)
 
 .PHONY: run-hdd
 run-hdd: run-hdd-$(ARCH)
@@ -131,15 +145,6 @@ run-hdd-riscv64: $(IMAGE_NAME).hdd
 		-drive file=$(IMAGE_NAME).hdd,format=raw,id=hd \
 		-device virtio-blk-device,drive=hd \
 		$(QEMUFLAGS)
-
-# --- OVMF firmware ---
-ovmf/ovmf-code-$(ARCH).fd:
-	mkdir -p ovmf
-	curl -Lo $@ https://github.com/osdev0/edk2-ovmf-nightly/releases/latest/download/ovmf-code-$(ARCH).fd
-	case "$(ARCH)" in \
-		aarch64) dd if=/dev/zero of=$@ bs=1 count=0 seek=67108864 2>/dev/null;; \
-		riscv64) dd if=/dev/zero of=$@ bs=1 count=0 seek=33554432 2>/dev/null;; \
-	esac
 
 # --- Limine ---
 .PHONY: fetch-limine
@@ -217,7 +222,7 @@ endif
 .PHONY: clean
 clean:
 	$(MAKE) -C kernel clean
-	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd $(FS_IMAGE) limine
+	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd $(FS_IMAGE) limine edk2-ovmf
 
 .PHONY: distclean
 distclean:
